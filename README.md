@@ -5,9 +5,11 @@ A result object for a validation function.
 
 ## Installation
 
-composer require jasny/validation-result
+    composer require jasny/validation-result
 
-## Usage
+## Examples
+
+##### Validate variable
 
 ```php
 use Jasny\ValidationResult;
@@ -23,6 +25,8 @@ function validateVar($var)
 $validation = validateVar($myVar);
 if ($validation->failed()) echo $validation->getError();
 ```
+
+##### Validate POST request
 
 ```php
 use Jasny\ValidationResult;
@@ -44,5 +48,5 @@ if ($validation->succeeded()) {
     exit();
 }
 
-loadTemplate('myTemplate', ['errors' => $validation->getErrors()];
+loadTemplate('myTemplate', ['errors' => $validation->getErrors()]);
 ```
