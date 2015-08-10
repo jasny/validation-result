@@ -1,0 +1,25 @@
+{
+    "name": "jasny/validation-result",
+    "description": "A result object for validation",
+    "keywords": ["validation"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Arnold Daniels",
+            "email": "arnold@jasny.net",
+            "homepage": "http://www.jasny.net"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/jasny/validation-result/issues",
+        "source": "https://github.com/jasny/validation-result"
+    },
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jasny\\": "src/"
+        }
+    }
+}
