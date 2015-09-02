@@ -8,17 +8,33 @@ namespace Jasny;
 class ValidationResult
 {
     /**
+     * Callback for translating the error message
+     * @var callback
+     */
+    public static $translate;
+    
+    
+    /**
      * @var array
      */
     protected $errors = [];
+
     
     /**
      * Add an error
      * 
      * @param string $message
+     * @param mixed  ...       Arguments to insert into the message
      */
     public function addError($message)
     {
+        if (isset(static::$translate)) $message = call_user_func(static::$translate, $message);
+        
+        if (func_num_args() > 1) {
+            $args = [0 => $message] + func_get_args();
+            $message = call_user_func_array('sprintf', $args);
+        }
+        
         $this->errors[] = $message;
     }
     
