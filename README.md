@@ -50,3 +50,32 @@ if ($validation->succeeded()) {
 
 loadTemplate('myTemplate', ['errors' => $validation->getErrors()]);
 ```
+
+## Translation
+
+It's possible to translate the error messages using a callback.
+
+```php
+use Jasny\ValidationResult;
+
+$aliases = [
+    "% isn't set" => "Please set %s",
+    "% is to high" => "Please choose a lower value for %s"
+];
+
+ValidationResult::$translate = function($message) use ($aliases) {
+    return isset($aliases[$message]) ? $aliases[$message] : $message;
+};
+
+function validateVar($var)
+{
+    if (isset($var)) return ValidationResult::error("%s isn't set", 'Var');
+    if ($var < 30) return ValidationResult::error("%s is less than %d", 'Var', 30);
+}
+```
+
+or simply
+
+```php
+ValidationResult::$translate = 'gettext';
+```
