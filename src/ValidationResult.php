@@ -41,10 +41,10 @@ class ValidationResult
     /**
      * Add errors from a validation object
      * 
-     * @param Validation $validation
-     * @param string     $prefix
+     * @param ValidationResult $validation
+     * @param string           $prefix
      */
-    public function add(Validation $validation, $prefix = '')
+    public function add(ValidationResult $validation, $prefix = '')
     {
         foreach ($validation->getErrors() as $err) {
             $this->errors[] = $prefix . $err; 
