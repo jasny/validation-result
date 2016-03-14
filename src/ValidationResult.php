@@ -24,16 +24,12 @@ class ValidationResult
      * Add an error
      * 
      * @param string $message
-     * @param mixed  ...       Arguments to insert into the message
+     * @param mixed  ...$args  Arguments to insert into the message
      */
-    public function addError($message)
+    public function addError($message, ...$args)
     {
         if (isset(static::$translate)) $message = call_user_func(static::$translate, $message);
-        
-        if (func_num_args() > 1) {
-            $args = [0 => $message] + func_get_args();
-            $message = call_user_func_array('sprintf', $args);
-        }
+        if (!empty($args)) $message = vsprintf($message, $args);
         
         $this->errors[] = $message;
     }
@@ -90,7 +86,9 @@ class ValidationResult
      */
     public function getError()
     {
-        if (count($this->errors) > 1) trigger_error("There are multiple errors", E_USER_WARNING);
+        if (count($this->errors) > 1) {
+            trigger_error("There are multiple errors, returning only the first", E_USER_WARNING);
+        }
         
         return reset($this->errors) ?: null;
     }
@@ -120,12 +118,13 @@ class ValidationResult
      * Factory method for failed validation
      * 
      * @param string $message
+     * @param mixed  ...$args  Arguments to insert into the message
      * @return static
      */
-    public static function error($message)
+    public static function error($message, ...$args)
     {
         $validation = new static();
-        $validation->addError($message);
+        $validation->addError($message, ...$args);
         
         return $validation;
     }
