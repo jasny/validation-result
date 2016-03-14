@@ -21,6 +21,18 @@ class ValidationResult
 
     
     /**
+     * Translate a message
+     *
+     * @param string $message
+     * @return $message
+     */
+    public function translate($message)
+    {
+        if (!isset(static::$translate)) return $message;
+        return call_user_func(static::$translate, $message);    
+    }
+    
+    /**
      * Add an error
      * 
      * @param string $message
@@ -28,7 +40,7 @@ class ValidationResult
      */
     public function addError($message, ...$args)
     {
-        if (isset(static::$translate)) $message = call_user_func(static::$translate, $message);
+        $message = $this->translate($message);
         if (!empty($args)) $message = vsprintf($message, $args);
         
         $this->errors[] = $message;
@@ -40,10 +52,12 @@ class ValidationResult
      * @param ValidationResult $validation
      * @param string           $prefix
      */
-    public function add(ValidationResult $validation, $prefix = '')
+    public function add(ValidationResult $validation, $prefix = null)
     {
+        $prefix = $this->translate($prefix);
+    
         foreach ($validation->getErrors() as $err) {
-            $this->errors[] = $prefix . $err; 
+            $this->errors[] = ($prefix ? trim($prefix) . ' ' : '') . $err; 
         }
     }
     
@@ -87,7 +101,7 @@ class ValidationResult
     public function getError()
     {
         if (count($this->errors) > 1) {
-            trigger_error("There are multiple errors, returning only the first", E_USER_WARNING);
+            trigger_error("There are multiple errors, returning only the first", E_USER_NOTICE);
         }
         
         return reset($this->errors) ?: null;
