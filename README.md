@@ -94,8 +94,8 @@ It's possible to translate the error messages using a callback.
 use Jasny\ValidationResult;
 
 $aliases = [
-    "%s isn't set" => "Please set %s",
-    "%s is less than %d" => "Please choose a value higher than %2$d for %1$s"
+    "%s isn't set" => 'Please set %s',
+    "%s is less than %d" => 'Please choose a value higher than %2$d for %1$s'
 ];
 
 ValidationResult::$translate = function($message) use ($aliases) {
