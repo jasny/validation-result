@@ -16,8 +16,8 @@ use Jasny\ValidationResult;
 
 function validateVar($var)
 {
-    if (isset($var)) return ValidationResult::error("Var isn't set");
-    if ($var < 30) return ValidationResult::error("Var is less than thirty");
+    if (isset($var)) return ValidationResult::error("var isn't set");
+    if ($var < 30) return ValidationResult::error("var is less than thirty");
     
     return ValidationResult::success();
 }
@@ -33,12 +33,12 @@ use Jasny\ValidationResult;
 
 function validateInput($input)
 {
-    $result = new ValidationResult();
+    $validation = new ValidationResult();
 
-    if (!isset($input['baz'])) return ValidationResult::error("Baz isn't set");
-    if (!isset($input['qux'])) return ValidationResult::error("Qux isn't set");
+    if (!isset($input['baz'])) $validation->addError("baz isn't set");
+    if (!isset($input['qux'])) $validation->addError("qux isn't set");
   
-    return $result;
+    return $validation;
 }
 
 $validation = validateInput($_POST);
@@ -51,6 +51,41 @@ if ($validation->succeeded()) {
 loadTemplate('myTemplate', ['errors' => $validation->getErrors()]);
 ```
 
+## Subvalidation
+You can add the validation result of a subvalidation using the `add()` method. It's possible to prefix all the errors
+of the subvalidation.
+
+```php
+use Jasny\ValidationResult;
+
+function validateInput($input)
+{
+    $validation = new ValidationResult();
+
+    if (!isset($input['baz'])) $validation->addError("baz isn't set");
+    if (!isset($input['qux'])) $validation->addError("qux isn't set");
+  
+    if (isset($input['foo'])) {
+        $fooValidation = validateFoo($input['foo']);
+        $validation->add($fooValidation, 'foo');
+    }
+  
+    return $validation;
+}
+
+function validateFoo($foo)
+{
+    $validation = new ValidationResult();
+    
+    if (empty($foo['name'])) $validation->addError("name isn't set");
+    if (empty($foo['age'])) $validation->addError("age isn't set");
+    
+    return $validation;
+}
+
+$validation = validateInput($_POST);
+```
+
 ## Translation
 
 It's possible to translate the error messages using a callback.
@@ -59,8 +94,8 @@ It's possible to translate the error messages using a callback.
 use Jasny\ValidationResult;
 
 $aliases = [
-    "% isn't set" => "Please set %s",
-    "% is to high" => "Please choose a lower value for %s"
+    "%s isn't set" => "Please set %s",
+    "%s is less than %d" => "Please choose a value higher than %2$d for %1$s"
 ];
 
 ValidationResult::$translate = function($message) use ($aliases) {
