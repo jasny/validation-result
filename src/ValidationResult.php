@@ -117,9 +117,20 @@ class ValidationResult
         return $this->errors;
     }
     
+  
+    /**
+     * Throw a validation exception if there are any errors
+     */
+    public function mustSucceed()
+    {
+        if ($this->failed()) {
+            throw new ValidationException($this);
+        }
+    }
+
 
     /**
-     * Factory method for successfull validation
+     * Factory method for successful validation
      * 
      * @return static
      */

@@ -3,9 +3,7 @@
 namespace Jasny;
 
 /**
- * Tests for Jasny\DB.
- * 
- * @package Test
+ * @covers \Jasny\ValidationResult
  * @backupStaticAttributes enabled
  */
 class ValidationResultTest extends \PHPUnit_Framework_TestCase
@@ -170,6 +168,30 @@ class ValidationResultTest extends \PHPUnit_Framework_TestCase
         $validation->getError();
     }
 
+
+    public function testMustSucceedForSuccess()
+    {
+        $validation = new ValidationResult();
+        $validation->mustSucceed();
+
+        $this->assertTrue(true, 'No exception was thrown');
+    }
+
+    public function testMustSucceedForFailed()
+    {
+        $validation = new ValidationResult();
+        $validation->addError("Foo");
+
+        try {
+            $validation->mustSucceed();
+        } catch (ValidationException $exception) {
+            $this->assertSame($validation, $exception->getValidationResult());
+            return;
+        }
+
+        $this->fail("No validation exception was thrown");
+    }
+
     
     public function testSuccess()
     {
@@ -195,4 +217,3 @@ class ValidationResultTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(["Colors red and blue for 020"], $validation->getErrors());
     }
 }
-
