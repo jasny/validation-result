@@ -60,4 +60,19 @@ class ValidationException extends \RuntimeException
     {
         return $this->validationResult->getErrors();
     }
+
+
+    /**
+     * Factory method for failed validation
+     *
+     * @param string $message
+     * @param mixed  ...$args  Arguments to insert into the message
+     * @return static
+     */
+    public static function error($message, ...$args)
+    {
+        $error = ValidationResult::error($message, ...$args);
+
+        return new static($error);
+    }
 }

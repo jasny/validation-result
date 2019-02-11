@@ -53,6 +53,14 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         ], $validationException->getErrors());
     }
 
+    public function testError()
+    {
+        $validationException = ValidationException::error('err %s %d %s', 'a', 11, 'b');
+
+        $this->assertInstanceOf(ValidationException::class, $validationException);
+        $this->assertEquals('err a 11 b', $validationException->getError());
+    }
+
     /**
      * @expectedException \UnexpectedValueException
      */
