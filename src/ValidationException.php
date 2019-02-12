@@ -26,7 +26,7 @@ class ValidationException extends \RuntimeException
             throw new UnexpectedValueException('Validation didn\'t fail, no exception should be thrown');
         }
 
-        parent::__construct('Validation failed');
+        parent::__construct("Validation failed;\n * " . join("\n * ", $validation->getErrors()));
 
         $this->validationResult = $validation;
     }

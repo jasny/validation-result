@@ -13,13 +13,17 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         error_reporting(E_ALL ^ E_STRICT);
     }
 
-    /**
-     * @expectedException \Jasny\ValidationException
-     * @expectedExceptionMessage Validation failed
-     */
     public function testThrow()
     {
-        $validationResult = ValidationResult::error('some error');
+        $this->setExpectedException(
+            ValidationException::class,
+            "Validation failed;\n * First error\n * Second error"
+        );
+
+        $validationResult = new ValidationResult();
+        $validationResult->addError('First error');
+        $validationResult->addError('Second error');
+
         throw new ValidationException($validationResult);
     }
 
