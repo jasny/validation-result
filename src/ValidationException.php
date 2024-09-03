@@ -38,7 +38,7 @@ class ValidationException extends \RuntimeException
     /**
      * Get the (first) validation error
      */
-    public function getError(): string
+    public function getError(): ?string
     {
         return $this->validationResult->getError();
     }
