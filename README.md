@@ -1,5 +1,13 @@
+![jasny-banner](https://user-images.githubusercontent.com/100821/62123924-4c501c80-b2c9-11e9-9677-2ebc21d9b713.png)
+
 Validation result
 =================
+
+[![PHP](https://github.com/jasny/validation-result/actions/workflows/php.yml/badge.svg)](https://github.com/jasny/validation-result/actions/workflows/php.yml)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/jasny/validation-result/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/jasny/validation-result/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/jasny/validation-result/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/jasny/validation-result/?branch=master)
+[![Packagist Stable Version](https://img.shields.io/packagist/v/jasny/validation-result.svg)](https://packagist.org/packages/jasny/validation-result)
+[![Packagist License](https://img.shields.io/packagist/l/jasny/validation-result.svg)](https://packagist.org/packages/jasny/validation-result)
 
 A result object for a validation function.
 
