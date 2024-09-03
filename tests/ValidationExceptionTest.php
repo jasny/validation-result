@@ -1,24 +1,26 @@
 <?php
 
-namespace Jasny;
+namespace Jasny\Tests;
 
-/**
- * @covers \Jasny\ValidationException
- * @backupStaticAttributes enabled
- */
-class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
+use Jasny\ValidationException;
+use Jasny\ValidationResult;
+use PHPUnit\Framework\Attributes\BackupStaticProperties;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
+#[BackupStaticProperties(true)]
+#[CoversClass(ValidationException::class)]
+class ValidationExceptionTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         error_reporting(E_ALL ^ E_STRICT);
     }
 
-    public function testThrow()
+    public function testThrow(): void
     {
-        $this->setExpectedException(
-            ValidationException::class,
-            "Validation failed;\n * First error\n * Second error"
-        );
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage("Validation failed;\n * First error\n * Second error");
 
         $validationResult = new ValidationResult();
         $validationResult->addError('First error');
@@ -27,7 +29,7 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         throw new ValidationException($validationResult);
     }
 
-    public function testGetValidationResult()
+    public function testGetValidationResult(): void
     {
         $validationResult = ValidationResult::error('some error');
         $validationException = new ValidationException($validationResult);
@@ -35,7 +37,7 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($validationResult, $validationException->getValidationResult());
     }
 
-    public function testGetError()
+    public function testGetError(): void
     {
         $validationResult = ValidationResult::error('some error');
         $validationException = new ValidationException($validationResult);
@@ -43,7 +45,7 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('some error', $validationException->getError());
     }
 
-    public function testGetErrors()
+    public function testGetErrors(): void
     {
         $validationResult = new ValidationResult();
         $validationResult->addError('First error');
@@ -57,7 +59,7 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         ], $validationException->getErrors());
     }
 
-    public function testError()
+    public function testError(): void
     {
         $validationException = ValidationException::error('err %s %d %s', 'a', 11, 'b');
 
@@ -65,11 +67,10 @@ class ValidationExceptionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('err a 11 b', $validationException->getError());
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
-    public function testConstructWithoutFailedValidation()
+    public function testConstructWithoutFailedValidation(): void
     {
+        $this->expectException(\UnexpectedValueException::class);
+
         $validationResult = ValidationResult::success();
         new ValidationException($validationResult);
     }

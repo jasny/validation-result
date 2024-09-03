@@ -9,21 +9,17 @@ use UnexpectedValueException;
  */
 class ValidationException extends \RuntimeException
 {
-    /**
-     * @var ValidationResult
-     */
-    protected $validationResult;
+    protected ValidationResult $validationResult;
 
     /**
      * ValidationException constructor.
      *
-     * @param ValidationResult $validation
      * @throws UnexpectedValueException
      */
     public function __construct(ValidationResult $validation)
     {
         if (!$validation->failed()) {
-            throw new UnexpectedValueException('Validation didn\'t fail, no exception should be thrown');
+            throw new UnexpectedValueException("Validation didn't fail, no exception should be thrown");
         }
 
         parent::__construct("Validation failed;\n * " . join("\n * ", $validation->getErrors()));
@@ -33,20 +29,16 @@ class ValidationException extends \RuntimeException
 
     /**
      * Get the validation result with the validation errors.
-     *
-     * @return ValidationResult
      */
-    public function getValidationResult()
+    public function getValidationResult(): ValidationResult
     {
         return $this->validationResult;
     }
 
     /**
      * Get the (first) validation error
-     *
-     * @return string
      */
-    public function getError()
+    public function getError(): string
     {
         return $this->validationResult->getError();
     }
@@ -54,9 +46,9 @@ class ValidationException extends \RuntimeException
     /**
      * Get the validation errors
      *
-     * @return array
+     * @return string[]
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->validationResult->getErrors();
     }
@@ -64,12 +56,8 @@ class ValidationException extends \RuntimeException
 
     /**
      * Factory method for failed validation
-     *
-     * @param string $message
-     * @param mixed  ...$args  Arguments to insert into the message
-     * @return static
      */
-    public static function error($message, ...$args)
+    public static function error(string $message, mixed ...$args): static
     {
         $error = ValidationResult::error($message, ...$args);
 

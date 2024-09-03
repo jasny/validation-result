@@ -1,175 +1,163 @@
 <?php
 
-namespace Jasny;
+namespace Jasny\Tests;
 
-/**
- * @covers \Jasny\ValidationResult
- * @backupStaticAttributes enabled
- */
-class ValidationResultTest extends \PHPUnit_Framework_TestCase
+use Jasny\PHPUnit\CallbackMockTrait;
+use Jasny\PHPUnit\ConsecutiveTrait;
+use Jasny\PHPUnit\ExpectWarningTrait;
+use Jasny\ValidationException;
+use Jasny\ValidationResult;
+use PHPUnit\Framework\Attributes\BackupStaticProperties;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Builder\InvocationMocker;
+use PHPUnit\Framework\TestCase;
+
+#[BackupStaticProperties(true)]
+#[CoversClass(ValidationResult::class)]
+class ValidationResultTest extends TestCase
 {
-    public function setUp()
-    {
-        error_reporting(E_ALL ^ E_STRICT);
-    }
+    use CallbackMockTrait;
+    use ConsecutiveTrait;
+    use ExpectWarningTrait;
 
-    public function tearDown()
+    public function tearDown(): void
     {
         ValidationResult::$translate = null;
     }
 
-    public function testAddError()
+    public function testAddError(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Test");
-        
+
         $this->assertEquals(["Test"], $validation->getErrors());
     }
 
-    public function testAddErrorMultiple()
+    public function testAddErrorMultiple(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Foo");
         $validation->addError("Bar");
-                
+
         $this->assertEquals(["Foo", "Bar"], $validation->getErrors());
     }
-    
-    public function testAddErrorWithArgs()
+
+    public function testAddErrorWithArgs(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Colors %s and %s for %03d", "red", "blue", 20);
-        
+
         $this->assertEquals(["Colors red and blue for 020"], $validation->getErrors());
     }
-    
 
-    public function testAdd()
+
+    public function testAdd(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Qux");
-        
+
         $error = new ValidationResult();
         $error->addError("Foo");
         $error->addError("Bar");
-        
+
         $validation->add($error);
-            
+
         $this->assertEquals(["Qux", "Foo", "Bar"], $validation->getErrors());
     }
 
-    public function testAddWithPrefix()
+    public function testAddWithPrefix(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Qux");
-        
+
         $error = new ValidationResult();
         $error->addError("Foo");
         $error->addError("Bar");
-        
+
         $validation->add($error, "bad");
-            
+
         $this->assertEquals(["Qux", "bad Foo", "bad Bar"], $validation->getErrors());
     }
-    
-    
-    public function testTranslate()
+
+
+    public function testTranslate(): void
     {
-        $translator = $this->getMockBuilder('stdClass')
-            ->setMethods(array('translate'))
-            ->getMock();
-    
-        $translator->expects($this->exactly(2))
-            ->method('translate')
-            ->withConsecutive([$this->equalTo('Foo')], [$this->equalTo('Bar')])
-            ->will($this->onConsecutiveCalls('Red', 'Blue'));
-    
-        ValidationResult::$translate = [$translator, 'translate'];
-    
+        $translator = $this->createCallbackMock($this->exactly(2), function (InvocationMocker $invoke) {
+            $invoke
+                ->with(...$this->consecutive(['Foo'], ['Bar']))
+                ->willReturnOnConsecutiveCalls('Red', 'Blue');
+        });
+
+        ValidationResult::$translate = $translator;
+
         $validation = new ValidationResult();
         $validation->addError("Foo");
         $validation->addError("Bar");
-                
+
         $this->assertEquals(["Red", "Blue"], $validation->getErrors());
     }
-    
-    public function testTranslatePrefix()
+
+    public function testTranslatePrefix(): void
     {
-        $translator = $this->getMockBuilder('stdClass')
-            ->setMethods(array('translate'))
-            ->getMock();
-    
-        $translator->expects($this->exactly(2))
-            ->method('translate')
-            ->withConsecutive([$this->equalTo('Color %s')], [$this->equalTo('error')])
-            ->will($this->onConsecutiveCalls('Colour %s', 'fault'));
-    
-        ValidationResult::$translate = [$translator, 'translate'];
-    
+        $translator = $this->createCallbackMock($this->exactly(2), function (InvocationMocker $invoke) {
+            $invoke
+                ->with(...$this->consecutive(['Color %s'], ['error']))
+                ->willReturnOnConsecutiveCalls('Colour %s', 'fault');
+        });
+
+        ValidationResult::$translate = $translator;
+
         $error = new ValidationResult();
         $error->addError("Color %s", "red");
 
         $validation = new ValidationResult();
         $validation->add($error, "error");
-        
+
         $this->assertEquals(["fault Colour red"], $validation->getErrors());
     }
-    
-    
-    public function testSucceeded()
+
+
+    public function testSucceeded(): void
     {
         $validation = new ValidationResult();
         $this->assertTrue($validation->succeeded());
         $this->assertTrue($validation->isSuccess(), 'alias');
-                
+
         $validation->addError("Test");
         $this->assertFalse($validation->succeeded());
         $this->assertFalse($validation->isSuccess(), 'alias');
     }
-    
-    public function testFailed()
+
+    public function testFailed(): void
     {
         $validation = new ValidationResult();
         $this->assertFalse($validation->failed());
-        
+
         $validation->addError("Test");
         $this->assertTrue($validation->failed());
     }
-    
-    
-    public function testGetError()
+
+
+    public function testGetError(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Foo");
-        
+
         $this->assertEquals("Foo", $validation->getError());
     }
 
-    public function testGetErrorWithMultiple()
+    public function testGetErrorWithMultiple(): void
     {
+        $this->expectNoticeMessage("There are multiple errors, returning only the first");
+
         $validation = new ValidationResult();
         $validation->addError("Foo");
         $validation->addError("Bar");
 
-        error_reporting(error_reporting() ^ E_USER_NOTICE);
-        $this->assertEquals("Foo", $validation->getError());
-    }
-    
-    /**
-     * @expectedException PHPUnit_Framework_Error_Notice
-     * @expectedExceptionDescription There are multiple errors, returning only the first
-     */
-    public function testGetErrorWarningWithMultiple()
-    {
-        $validation = new ValidationResult();
-        $validation->addError("Foo");
-        $validation->addError("Bar");
-                
         $validation->getError();
     }
 
-
-    public function testMustSucceedForSuccess()
+    public function testMustSucceedForSuccess(): void
     {
         $validation = new ValidationResult();
         $validation->mustSucceed();
@@ -177,7 +165,7 @@ class ValidationResultTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(true, 'No exception was thrown');
     }
 
-    public function testMustSucceedForFailed()
+    public function testMustSucceedForFailed(): void
     {
         $validation = new ValidationResult();
         $validation->addError("Foo");
@@ -192,27 +180,27 @@ class ValidationResultTest extends \PHPUnit_Framework_TestCase
         $this->fail("No validation exception was thrown");
     }
 
-    
-    public function testSuccess()
+
+    public function testSuccess(): void
     {
         $validation = ValidationResult::success();
-        
+
         $this->assertInstanceOf(ValidationResult::class, $validation);
         $this->assertEquals([], $validation->getErrors());
     }
-    
-    public function testError()
+
+    public function testError(): void
     {
         $validation = ValidationResult::error("Foo");
-        
+
         $this->assertInstanceOf(ValidationResult::class, $validation);
         $this->assertEquals(["Foo"], $validation->getErrors());
     }
-    
-    public function testErrorWithArgs()
+
+    public function testErrorWithArgs(): void
     {
         $validation = ValidationResult::error("Colors %s and %s for %03d", "red", "blue", 20);
-        
+
         $this->assertInstanceOf(ValidationResult::class, $validation);
         $this->assertEquals(["Colors red and blue for 020"], $validation->getErrors());
     }
